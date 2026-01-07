@@ -17,5 +17,12 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     List<Medicine> findByNameContainingIgnoreCase(String name);
     
+    long countByExpiryDateBefore(LocalDate date);
+
+    List<Medicine> findTop5ByExpiryDateAfterOrderByExpiryDateAsc(LocalDate date);
+
+    List<Medicine> findByExpiryDateBeforeAndExpiryReadFalse(LocalDate date);
+
+    
     
 }

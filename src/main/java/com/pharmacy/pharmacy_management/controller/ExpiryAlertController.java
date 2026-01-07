@@ -1,38 +1,35 @@
 package com.pharmacy.pharmacy_management.controller;
 
-import java.util.List;
-
+import com.pharmacy.pharmacy_management.model.Medicine;
+import com.pharmacy.pharmacy_management.repository.MedicineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.pharmacy.pharmacy_management.model.ExpiryAlert;
-import com.pharmacy.pharmacy_management.service.ExpiryAlertService;
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/expiry")
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class ExpiryAlertController {
 
     @Autowired
-    private ExpiryAlertService service;
+    private MedicineRepository medicineRepository;
 
-    @GetMapping("/generate")
-    public void generateAlerts() {
-        service.generateExpiryAlerts();
+    // 🔹 Fetch unread expiry alerts
+    @GetMapping("/alerts")
+    public List<Medicine> getExpiryAlerts() {
+        return medicineRepository
+                .findByExpiryDateBeforeAndExpiryReadFalse(LocalDate.now());
     }
 
-    @GetMapping("/all")
-    public List<ExpiryAlert> getAllAlerts() {
-        return service.getAllAlerts();
-    }
+    // 🔹 Mark alert as read
+    @PutMapping("/mark-read/{id}")
+    public void markAsRead(@PathVariable Long id) {
+        Medicine med = medicineRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Medicine not found"));
 
-    @GetMapping("/count")
-    public long getAlertCount() {
-        return service.getUnreadCount();
-    }
-
-    @PutMapping("/read/{id}")
-    public void markRead(@PathVariable Long id) {
-        service.markAsRead(id);
+        med.setExpiryRead(true);   // ✅ FIXED
+        medicineRepository.save(med);
     }
 }
